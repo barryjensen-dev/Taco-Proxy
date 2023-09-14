@@ -1,162 +1,171 @@
-<p align="center"><img src="https://raw.githubusercontent.com/titaniumnetwork-dev/ultraviolet-static/main/uv.png" height="200">
-</p>
+# [Taco Proxy](https://github.com/Tacosheel/TacoProxy)
+### A frontend for AlloyProxy, a node.js web proxy for use in combating web filters
 
-<h1 align="center">Ultraviolet-Node</h1>
-
-<p align="center">The deployable version of Ultraviolet, a highly sophisticated proxy used for evading internet censorship or accessing websites in a controlled sandbox using the power of service-workers and more!<br><br></p>
-
-## Features
-- CAPTCHA support along with hCAPTCHA support
-- URL encoding settings to further hide activity when using Ultraviolet
-- Configuration all done on the client-side via service-workers
-- Speed in comparison to other web proxies that fully proxy content
-- Blacklist setting and more for easy hosting
-- Security in mind and leak prevention
-- Frequent updates to improve site support or fix security issues
-
-## Supported Sites
-- [Youtube](https://www.youtube.com)
-- [CAPTCHA/hCAPTCHA](https://www.captcha.net)
-- [Spotify](https://spotify.com)
-- [Discord](https://discord.com)
-- [Reddit](https://reddit.com)
-- [GeForce NOW](https://play.geforcenow.com/) (Partially Supported)
-- And more!
-
-## Technologies Used
-- Service Workers
-- HTML, JS, CSS rewriting
-- Parse5
-- Acorn.js
-
-## Used by
-- [Incognito](https://github.com/caracal-js/Incognito), a popular web proxy service with focus on privacy
-- [Holy-Unblocker](https://github.com/titaniumnetwork-dev/Holy-Unblocker), a popular web proxy service focusing on bypassing web filters and more
-- [Hypertabs](titaniumnetwork.org/), a web proxy service using a PWA browser as its frontend
-
-## Table of Contents
-- [Installation And Setup](#installation-and-setup)
-- [Basic Guide](#basic-guide)
-- [Replit Setup Guide](#replit-setup-guide)
-- [Comprehensive Guide](#comprehensive-guide)
-- [Configuration](#configuration)
-- [Frontend](#static-files)
-- [Core Scripts](#core-scripts)
-
-# Installation and Setup
-
-Installation of Ultraviolet is simple. You can find a Tl;DR of the installation and setup process just below. If you are unfamiliar with the "standard" installation process, look a bit farther down for a more comprehensive installation and setup guide.
-
-## Basic Guide
-
-```sh
-$ git clone https://github.com/titaniumnetwork-dev/Ultraviolet-Node --recursive
-$ cd Ultraviolet-Node
-$ npm install
-$ npm start
+# Updates
+```
+(Updated 3/4/23: V2)
 ```
 
-## Replit Setup Guide
+##### PageSpeed rating of [0/0](https://google.com) 
 
-To setup on Replit, first click on the "Run on Replit" button. After loading into your repl, click on the green "Run" button. Alternatively, run the following commands:
+# Domains
+Coming Soon
 
-```sh
-$ npm install
-$ chmod +x main.sh
-$ ./main.sh
+# How to Use
+### Module Use
+
+1. `npm install alloyproxy`
+
+2. Set all of your configs in the main file for the Node app.
+
+3. Start up your app and unblock a website at `/prefix/[BASE64 ENCODED WEBSITE ORIGIN]/`. The path of the website does not have to be B64 encoded.
+
+A good example of what code to use is here using the Express.js framework.
+
+### Sample Express Application
+1. Navigate to the `/examples/` folder.
+
+2. Do the following commands:
+
+```
+cd examples/express
+
+npm install
+
+npm start
 ```
 
-You will only have to run the second command once. It just allows `main.sh` to be executed. By running `main.sh`, you will update any submodules and will start the app.
+The demo application will run at `localhost:8080` by default however the port can be configured in `config.json`.
 
-**Note**: If you choose not to use `main.sh`, but would rather just run all commands manually, please note that you will have to manually install submodules by running `git update submodules --init`. Without it, `static` will not be installed, and that is a required directory.
+The static folder provides you with the base site if you wish to go manual about this.
 
-## Comprehensive Guide
+### Sample Implementation 
+Add this to your server-side script ex. "app.js".
+```
+// Note: make sure you use Alloy before any other Express middleware that sends responses to client or handles POST data.
 
-Below will describe a comprehensive guide to install Ultraviolet on Linux machines.
+const Alloy = require('alloyproxy'),
+    http = require('http'),
+    express = require('express'),
+    app = express();
+    
+const server = http.createServer(app);   
 
-To clone the repository, simply run the following command:
+const Unblocker = new Alloy({
+    prefix: '/fetch/',
+    request: [],
+    response: [],
+    injection: true,
+});    
+ 
+// The main part of the proxy. 
+ 
+app.use(Unblocker.app);    
 
-```sh
-$ git clone https://github.com/titaniumnetwork-dev/Ultraviolet-Node --recursive
+// WebSocket handler.
+
+Unblocker.ws(server);    
+
+server.listen('8080')
+
 ```
 
-The `--recursive` flag will clone the repository and all submodules.
+## Configurations
+### General Use
 
-To begin work on the actual setup, cd into the repository. You can do so by running the following command:
-
-```sh
-$ cd Ultraviolet-Node
+```
+    prefix: '/prefix/',
+    blocklist: [],
+    // error: (proxy) => { return res.end('proxy.error.info.message') },  Custom error handling which is optional.
+    request: [], // Add custom functions before request is made or modify the request.
+    response: [], // Add custom functions after the request is made or modify the response.
+    injection: true, // Script injection which is helpful in rewriting window.fetch() and all kinds of client-side JS requests.
+    requestAgent: null, // Set a custom agent to use in the request.
+    // userAgent: Uses the clients "User-Agent" request header by default. More customizable using the "request" option in the configs.
+    localAddress: [] // Neat feature in basic http(s).request() to choose what IP to use to make the request. Will be randomized if there is multiple.
 ```
 
-From here, you can update your submodules and install your dependencies. To do so, run the following command:
+### Extended Configuration Information
 
-```sh
-$ npm install
+To use the "request" and "response" options in the config. You must make a function like this for example.
+
 ```
+customFunction = (proxy) => {
 
-Finally, to start Ultraviolet, run the following command:
+  if (proxy.url.hostname == 'example.org' && proxy.response.headers['content-type'].startsWith('text/html')) {
+  
+    return proxy.sendResponse == proxy.sendResponse.toString().replace(/example/gi, 'cat :3');
+  
+  };
 
-```sh
-$ npm start
-```
-
-You can then find Ultraviolet on `http://127.0.0.1:8080`. If you would like to change the port UV will be running on, edit the last line in `index.mjs`. 
-
-Please note that UV will not function without HTTPS. If you are hosting on Replit or Heroku, this won't be a problem as they provide you with SSL/TLS by default and will automatically apply it to your instance, however if you are attempting to host UV on a different platform, such as a personal server, you **WILL** need to use HTTPS. 
-
-## Configuration
-Configuring Ultraviolet is very simple. Simple descriptions of each configurable option are provided as a comment in the block below. More detailed documentation can be found just below mentioned block.
-
-`uv.config.js`
-
-```javascript
-self.__uv$config = {
-    prefix: '/sw/', // Proxy url prefix
-    bare: '/bare/', // Bare server location
-    encodeUrl: Ultraviolet.codec.xor.encode, // URL Encoding function
-    decodeUrl: Ultraviolet.codec.xor.decode, // Decode URL function
-    handler: '/uv.handler.js', // Handler script
-    bundle: '/uv.bundle.js', // Bundled script
-    config: '/uv.config.js', // Configuration script
-    sw: '/uv.sw.js', // Service Worker Script
 };
+
+new Alloy({
+prefix: '/prefix/',
+blocklist: [],
+// error: (proxy) => { return res.end('proxy.error.info.message') },  Custom error handling which is optional.
+request: [], // Add custom functions before request is made or modify the request.
+response: [
+    
+  customFunction
+    
+], // Add custom functions after the request is made or modify the response.
+injection: true, // Script injection which is helpful in rewriting window.fetch() and all kinds of client-side JS requests.
+requestAgent: null, // Set a custom agent to use in the request.
+// userAgent: Uses the clients "User-Agent" request header by default. More customizable using the "request" option in the configs.
+localAddress: [] // Neat feature in basic http(s).request() to choose what IP to use to make the request. Will be randomized if there is multiple.
+})
 ```
 
-| Configuration | Options and Explanation |
-| ------------- | ----------------------- |
-| Prefix | The prefix is the prefix that you want users to see. Ex: `https://example.com/service.` The default prefix is `service`. |
-| Bare | Bare Servers can run on directories. For example, if the directory was /bare/ then the bare origin would look like `http://example.org/bare/`. The bare origin is passed to clients. |
-| encodeUrl| EncodeUrl is how you want the URL a proxy site's visitors has to be encoded. Options include `Ultraviolet.codec.base64.encode`, `Ultraviolet.codec.plain.encode`, or `Ultraviolet.codec.xor.encode`. It is recommended that you use `xor` or `base64` as it hides the queries your visitors are searching and visiting.
-| decodeURL | DecodeUrl is how you want the url to be decoded. It is recommended you keep it the same as `encodeUrl`. |
-| Handler | Handler is the path to the UV handler. The default name and path to this file is `static/uv/uv.handler.js`. |
-| Bundle | Bundle is the path to the UV bundle file. The default name and path to this file is `static/uv/uv.bundle.js`. |
-| Config | Config is the path to the UV config file. The default name and path to this file is `static/uv/uv.bundle.js`. |
-| SW | SW is the path to the UV Service Worker script. The default name and path to this file is `static/uv/uv.sw.js`. |
+What this will do is when the hostname of a website being accessed is `example.org`. The console sends you "weee :3". If you want a preview of what options you have, heres a list. :)
 
-## Static Files
+```
 
-Static files is the frontend for Ultraviolet. A standalone repository for it can be found [here](https://github.com/titaniumnetwork-dev/Ultraviolet-Static).
+// Basic HTTP functions.
 
-## Core Scripts
+proxy.req // This is the request option in HTTP servers. If Express.js is being used, you can use Express.js functions.
+proxy.res // This is the response option in HTTP servers. If Express.js is being used, you can use Express.js functions.
+proxy.next() // This is only avaliable in Express.js . If used in native HTTP, the app will display blank text as a filler.
 
-[Configuration](#configuration) mentions a few scripts that make up Ultraviolet. To get documentation for what each of the scripts do, check out the [documentation](https://github.com/titaniumnetwork-dev/Ultraviolet-Core) for them in their standalone repository.
+// Request
 
-# Main Scripts After Building
+proxy.request.headers // A modified version of the client's request headers used in sending the request.
+proxy.request.method // The clients request method.
+proxy.request.body // The POST body of a POST / PATCH request. 
 
-The client-hooking & service worker scripts required for UV are located in [ultraviolet-scripts](https://github.com/titaniumnetwork-dev/ultraviolet-scripts)
+// Response
 
-- Scripts
-    - `uv.sw.js` Service worker gateway
-    - `uv.sw-handler.js` - Service worker handler
-    - `uv.bundle.js` Webpack compiled Ultraviolet rewriter
-    - `uv.handler.js` Client-side hooking
-    - `uv.config.js` Configuration
+proxy.response // The entire response of the website. Contains headers, JSON / text response, and all Node.js http(s).request() response data.
+proxy.response.headers // Response headers the website gave back. Is modified to filter out bad headers, and rewrite "Set-Cookie" header.
+proxy.sendResponse // The modified response buffer the website gave back. You can modify it in anyway you desire. :)
 
-# Authors
+// Errors
 
-- Caracal.js (Creator of Ultraviolet)
-- Divide (Creator of TOMP)
+proxy.error.status // Outputs "true" when theres an error.
+proxy.error.info // Gives information about an error.
+proxy.error.info.code // Gives error code. Error codes such as "ENOTFOUND" mean a website could not be found. "BLOCKED" means a website is blocked.
+proxy.error.info.message // Gives error message.
+proxy.blocked.status // Outputs "true" when a filtered hostname is detected.
+
+```
 
 # Credits
-- https://github.com/tomphttp
+- [Titanium Network](https://github.com/titaniumnetwork-dev)
+- [QuiteAFancyEmerald](https://github.com/QuiteAFancyEmerald)
+- [Jason](https://github.com/caracal-js)
+- [B3ATDROP3R](https://github.com/B3ATDROP3R)
+- [shirt](https://github.com/shirt-dev)
+- [Xproassassinn](https://github.com/Xproassassinn)
 
+# License 
+![GitHub](https://img.shields.io/github/license/tacosheel/tacoproxy?style=for-the-badge)
+```
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
+### Copyright (c) 2020-2023 Tacosheel
